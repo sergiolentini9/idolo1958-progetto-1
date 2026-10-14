@@ -1,0 +1,466 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcolatore Ora Solare dal Sole • San Giorgio del Sannio</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        
+        :root {
+            --primary: #1e40af;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(15, 23, 42, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(to right, #1e40af, #3b82f6);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #cbd5e1;
+        }
+        
+        input {
+            padding: 14px 16px;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            background: #1e2937;
+            color: #e2e8f0;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+        }
+        
+        .help-text {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 6px;
+        }
+        
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(59 130 246);
+        }
+        
+        .result {
+            margin-top: 30px;
+            background: #0f172a;
+            border-radius: 16px;
+            padding: 30px;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .time-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1e2937;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .time-label {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        .time-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #60a5fa;
+            font-family: monospace;
+        }
+        
+        .info {
+            background: #1e2937;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-top: 30px;
+        }
+        
+        .error {
+            color: #f87171;
+            background: #450a0a;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        
+        .default-btn {
+            background: #64748b;
+            font-size: 1rem;
+            padding: 10px 20px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>☀️ Calcolatore Ora Solare</h1>
+            <p class="subtitle">Da azimut e altezza del sole → Ora solare vera, locale e civile</p>
+            <p style="margin-top: 12px; opacity: 0.85; font-size: 1rem;">Località predefinita: San Giorgio del Sannio (BN)</p>
+        </header>
+        
+        <div class="content">
+            <div class="form-grid">
+                <!-- Latitudine -->
+                <div class="form-group">
+                    <label for="lat">Latitudine (°)</label>
+                    <input type="number" id="lat" step="0.0001" value="41.0684">
+                    <div class="help-text">Valore predefinito: San Giorgio del Sannio</div>
+                </div>
+                
+                <!-- Longitudine -->
+                <div class="form-group">
+                    <label for="lon">Longitudine (°)</label>
+                    <input type="number" id="lon" step="0.0001" value="14.8532">
+                    <div class="help-text">Valore predefinito: San Giorgio del Sannio</div>
+                </div>
+                
+                <!-- Data -->
+                <div class="form-group">
+                    <label for="data">Data di osservazione</label>
+                    <input type="date" id="data">
+                </div>
+                
+                <!-- Azimut -->
+                <div class="form-group">
+                    <label for="az">Azimut del sole (°)</label>
+                    <input type="number" id="az" value="180" min="0" max="360" step="0.1">
+                    <div class="help-text">0° = Nord, 90° = Est, 180° = Sud, 270° = Ovest</div>
+                </div>
+                
+                <!-- Altezza -->
+                <div class="form-group">
+                    <label for="alt">Altezza del sole (°)</label>
+                    <input type="number" id="alt" value="30" min="0" max="90" step="0.1">
+                    <div class="help-text">Angolo sopra l'orizzonte (0°-90°)</div>
+                </div>
+                
+                <!-- Fuso orario -->
+                <div class="form-group">
+                    <label for="tz">Offset fuso orario (ore da UTC)</label>
+                    <input type="number" id="tz" value="1" step="0.5">
+                    <div class="help-text">1 = CET (inverno Italia) • 2 = CEST (estate Italia)</div>
+                </div>
+            </div>
+            
+            <button onclick="calcola()">🔥 Calcola le tre ore</button>
+            
+            <div id="result" class="result">
+                <h2 style="margin-bottom: 20px; font-size: 1.5rem;">Risultati</h2>
+                
+                <div class="time-card">
+                    <div>
+                        <div class="time-label">🌞 Ora Solare Vera (Apparente)</div>
+                        <div style="font-size: 0.9rem; color: #94a3b8;">basata direttamente sulla posizione del sole</div>
+                    </div>
+                    <div id="ost" class="time-value">--:--</div>
+                </div>
+                
+                <div class="time-card">
+                    <div>
+                        <div class="time-label">🕒 Ora Locale (Solare Media)</div>
+                        <div style="font-size: 0.9rem; color: #94a3b8;">tempo medio locale</div>
+                    </div>
+                    <div id="lst" class="time-value">--:--</div>
+                </div>
+                
+                <div class="time-card">
+                    <div>
+                        <div class="time-label">🕰️ Ora Civile (Ufficiale)</div>
+                        <div style="font-size: 0.9rem; color: #94a3b8;">orologio della tua zona</div>
+                    </div>
+                    <div id="civil" class="time-value">--:--</div>
+                </div>
+                
+                <div id="extra-info" style="margin-top: 25px; font-size: 0.95rem; line-height: 1.6; color: #94a3b8;"></div>
+            </div>
+            
+            <div id="error" class="error" style="display: none;"></div>
+            
+            <div class="info">
+                <strong>Come funziona?</strong><br>
+                Inserisci la posizione del sole (azimut e altezza) misurata o ottenuta da un’app/sensore.<br>
+                Il calcolatore risolve le formule astronomiche inverse e ti restituisce:
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li><strong>Ora Solare Vera</strong>: tempo apparente del sole (direttamente legato all’angolo orario)</li>
+                    <li><strong>Ora Locale</strong>: tempo solare medio locale</li>
+                    <li><strong>Ora Civile</strong>: tempo ufficiale (con correzione fuso orario)</li>
+                </ul>
+                Puoi cambiare latitudine/longitudine per qualsiasi località del mondo.
+            </div>
+            
+            <button onclick="resetDefault()" class="default-btn">↺ Ripristina valori predefiniti San Giorgio del Sannio</button>
+        </div>
+        
+        <footer>
+            realizzato da IA su progetto di dr. Idolo Tedesco (idolo1958)
+        </footer>
+    </div>
+
+    <script>
+        // Funzione per calcolare il giorno dell'anno (DOY)
+        function getDOY(date) {
+            const year = date.getFullYear();
+            const janFirstPrev = new Date(year, 0, 0);
+            const diff = date.getTime() - janFirstPrev.getTime();
+            return Math.floor(diff / 86400000);
+        }
+
+        // Funzione principale di calcolo
+        function calcola() {
+            const lat = parseFloat(document.getElementById('lat').value);
+            const lon = parseFloat(document.getElementById('lon').value);
+            const azInput = parseFloat(document.getElementById('az').value);
+            const altInput = parseFloat(document.getElementById('alt').value);
+            const tzOffset = parseFloat(document.getElementById('tz').value);
+            
+            let dataInput = document.getElementById('data').value;
+            if (!dataInput) {
+                dataInput = new Date().toISOString().split('T')[0];
+                document.getElementById('data').value = dataInput;
+            }
+            const date = new Date(dataInput);
+            
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+            
+            // Reset
+            errorDiv.style.display = 'none';
+            resultDiv.classList.remove('show');
+            
+            // Validazione base
+            if (isNaN(lat) || isNaN(lon) || isNaN(azInput) || isNaN(altInput) || isNaN(tzOffset)) {
+                errorDiv.textContent = "⚠️ Inserisci tutti i valori numerici corretti.";
+                errorDiv.style.display = 'block';
+                return;
+            }
+            if (altInput < 0 || altInput > 90) {
+                errorDiv.textContent = "⚠️ L'altezza del sole deve essere tra 0° e 90°.";
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Calcoli
+            const doy = getDOY(date);
+            const B_deg = (360 / 365) * (doy - 81);
+            const B = B_deg * Math.PI / 180;
+            
+            // Declinazione solare (approssimazione Cooper)
+            const delta_deg = 23.45 * Math.sin((360 / 365) * (doy - 81) * Math.PI / 180);
+            const delta = delta_deg * Math.PI / 180;
+            
+            const phi = lat * Math.PI / 180;        // latitudine in radianti
+            const alpha = altInput * Math.PI / 180; // altezza in radianti
+            
+            // Calcolo cos(ω)
+            let cos_omega = (Math.sin(alpha) - Math.sin(phi) * Math.sin(delta)) / 
+                            (Math.cos(phi) * Math.cos(delta));
+            
+            if (Math.abs(cos_omega) > 1) {
+                errorDiv.textContent = "⚠️ Posizione del sole impossibile per questa data e latitudine.";
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            const omega_pos = Math.acos(Math.max(-1, Math.min(1, cos_omega))) * 180 / Math.PI;
+            const candidates = [omega_pos, -omega_pos];
+            
+            let best_omega = null;
+            let min_diff = Infinity;
+            
+            for (let omega_deg of candidates) {
+                const omega_rad = omega_deg * Math.PI / 180;
+                
+                // Calcolo azimut previsto (γs da Sud)
+                const sin_gamma = Math.cos(delta) * Math.sin(omega_rad) / Math.cos(alpha);
+                const cos_gamma = (Math.sin(alpha) * Math.sin(phi) - Math.sin(delta)) / 
+                                  (Math.cos(alpha) * Math.cos(phi));
+                
+                let gamma_deg = Math.atan2(sin_gamma, cos_gamma) * 180 / Math.PI;
+                
+                // Converti in azimut da Nord (0-360)
+                let az_calc = (gamma_deg + 180) % 360;
+                if (az_calc < 0) az_calc += 360;
+                
+                // Differenza minima (considera circolarità)
+                let diff = Math.min(
+                    Math.abs(az_calc - azInput),
+                    360 - Math.abs(az_calc - azInput)
+                );
+                
+                if (diff < min_diff) {
+                    min_diff = diff;
+                    best_omega = omega_deg;
+                }
+            }
+            
+            if (min_diff > 8) {
+                errorDiv.textContent = "⚠️ L'azimut inserito non è compatibile con l'altezza per questa data/latitudine.";
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Ora Solare Vera (Apparente)
+            let AST = 12 + best_omega / 15;
+            
+            // Equation of Time (minuti)
+            const EOT_min = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+            const EOT = EOT_min / 60; // in ore
+            
+            // Ora Locale (Solare Media)
+            let LMST = AST - EOT;
+            
+            // Ora Civile
+            const lon_hours = lon / 15;
+            let civil = LMST - lon_hours + tzOffset;
+            
+            // Normalizza ore 0-24
+            const normalize = (h) => {
+                h = h % 24;
+                return h < 0 ? h + 24 : h;
+            };
+            
+            AST = normalize(AST);
+            LMST = normalize(LMST);
+            civil = normalize(civil);
+            
+            // Formattazione HH:MM
+            function formatTime(h) {
+                const hh = Math.floor(h);
+                const mm = Math.round((h - hh) * 60);
+                return `${hh.toString().padStart(2, '0')}:${mm.toString().padStart(2, '0')}`;
+            }
+            
+            // Mostra risultati
+            document.getElementById('ost').textContent = formatTime(AST);
+            document.getElementById('lst').textContent = formatTime(LMST);
+            document.getElementById('civil').textContent = formatTime(civil);
+            
+            // Info extra
+            document.getElementById('extra-info').innerHTML = `
+                Data: <strong>${date.toLocaleDateString('it-IT')}</strong> • 
+                Declinazione solare: <strong>${delta_deg.toFixed(2)}°</strong><br>
+                Angolo orario ω: <strong>${best_omega.toFixed(1)}°</strong> • 
+                EOT: <strong>${EOT_min.toFixed(1)} minuti</strong><br>
+                <small>Formule approssimate ma sufficienti per uso amatoriale/educativo.</small>
+            `;
+            
+            resultDiv.classList.add('show');
+        }
+        
+        // Ripristina valori predefiniti
+        function resetDefault() {
+            document.getElementById('lat').value = "41.0684";
+            document.getElementById('lon').value = "14.8532";
+            document.getElementById('tz').value = "1";
+            document.getElementById('az').value = "180";
+            document.getElementById('alt').value = "30";
+            calcola();
+        }
+        
+        // Imposta data odierna al caricamento
+        window.onload = function() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            let mm = String(today.getMonth() + 1).padStart(2, '0');
+            let dd = String(today.getDate()).padStart(2, '0');
+            document.getElementById('data').value = `${yyyy}-${mm}-${dd}`;
+            
+            // Messaggio di benvenuto nella console (per debug)
+            console.log('%c✅ Calcolatore Ora Solare caricato correttamente!', 'color: #3b82f6; font-weight: bold;');
+        }
+    </script>
+</body>
+</html>
